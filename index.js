@@ -34,8 +34,18 @@ function broadcast(type, data) {
   });
 }
 
-wss.on('connection', (socket) => {
+wss.on('connection', (socket, req) => {
+  const ip = (req && req.socket && req.socket.remoteAddress) ? req.socket.remoteAddress : 'unknown-ip';
+  const ua = (req && req.headers && req.headers['user-agent']) ? req.headers['user-agent'] : 'unknown-ua';
+  console.log(`🔌 WS client connected from ${ip} (UA: ${ua}). Active clients: ${wss.clients.size}`);
   socket.send(JSON.stringify({ type: 'ready', data: { message: 'connected' }, ts: Date.now() }));
+
+  socket.on('close', (code) => {
+    console.log(`👋 WS client disconnected (${ip}), code=${code}. Active clients: ${wss.clients.size}`);
+  });
+  socket.on('error', (err) => {
+    console.warn(`⚠️ WS client error (${ip}):`, err && err.message ? err.message : err);
+  });
 });
 
 console.log(`🔌 WebSocket server listening on ws://localhost:${WS_PORT}`);
