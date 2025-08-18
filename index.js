@@ -23,7 +23,7 @@ console.log('');
 
 // WebSocket server
 const WS_PORT = Number(process.env.WS_PORT || 8080);
-const wss = new WebSocket.Server({ port: WS_PORT });
+const wss = new WebSocket.Server({ port: WS_PORT, host: '0.0.0.0' });
 
 function broadcast(type, data) {
   const payload = JSON.stringify({ type, data, ts: Date.now() });
@@ -48,7 +48,7 @@ wss.on('connection', (socket, req) => {
   });
 });
 
-console.log(`🔌 WebSocket server listening on ws://localhost:${WS_PORT}`);
+console.log(`🔌 WebSocket server listening on ws://0.0.0.0:${WS_PORT}`);
 
 // Simple HTTP static server for images
 const HTTP_PORT = Number(process.env.HTTP_PORT || 8081);
@@ -112,7 +112,7 @@ const httpServer = http.createServer((req, res) => {
   }
 });
 
-httpServer.listen(HTTP_PORT, () => {
+httpServer.listen(HTTP_PORT, '0.0.0.0', () => {
   console.log(`🌐 HTTP server serving images at ${PUBLIC_BASE_URL}/images/<filename>`);
 });
 
