@@ -8,7 +8,7 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - WS_PORT=8080
       - HTTP_PORT=8081
-      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:8081}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-https://websocket.smcm.io}
     ports:
       - "8080:8080"   # WebSocket
       - "8081:8081"   # HTTP images
