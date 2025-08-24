@@ -5,7 +5,7 @@ const WebSocket = require('ws');
 const http = require('http');
 
 // Bot token from env (recommended) with fallback to inline token
-const token = process.env.TELEGRAM_BOT_TOKEN || '8330197125:AAHy1QU1wRYbwpmQft4hQ4_ZSQl67R-PVgo';
+const token = process.env.TELEGRAM_BOT_TOKEN || '8247161134:AAFId4PdBVbYv46rREMwKnfKQlHC_IQ7Bzs';
 
 // Create a bot instance
 const bot = new TelegramBot(token, { polling: true });
