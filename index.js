@@ -157,6 +157,8 @@ function isTradingSignal(text) {
   const criteria = [hasSignalKeywords, hasTradingStructure, hasCurrency, hasPriceLevels];
   const matchCount = criteria.filter(Boolean).length;
   
+
+  
   return matchCount >= 3;
 }
 
@@ -510,6 +512,8 @@ bot.on('channel_post', async (msg) => {
   const imagePresent = hasImage(msg);
 
   const isSignal = isTradingSignal(textOrCaption);
+  
+
 
   // Always save images when present
   let savedPaths = [];
