@@ -200,13 +200,9 @@ function extractSignalDetails(text) {
     signal.tp2 = tp2Match[1];
   }
   
-  const stoplossMatch = text.match(/Stop\s*loss|Stoploss\s*:\s*(\d+\.?\d*)/i);
+  const stoplossMatch = text.match(/(?:Stop\s*loss|Stoploss)\s*:\s*(\d+\.?\d*)/i);
   if (stoplossMatch) {
-    // If regex grouped differently, pick last numeric part
-    const nums = stoplossMatch[0].match(/\d+\.?\d*/g);
-    if (nums && nums.length) {
-      signal.stoploss = nums[nums.length - 1];
-    }
+    signal.stoploss = stoplossMatch[1];
   }
   
   const linkMatch = text.match(/https:\/\/t\.me\/\w+/);
@@ -431,6 +427,8 @@ bot.on('edited_message', async (msg) => {
   const textOrCaption = getMessageTextOrCaption(msg) || '[No text content]';
   const imagePresent = hasImage(msg);
 
+  const isSignal = isTradingSignal(textOrCaption);
+
   // Always save images when present
   let savedPaths = [];
   if (imagePresent) {
@@ -441,24 +439,28 @@ bot.on('edited_message', async (msg) => {
       const urls = savedPaths.map((p) => toPublicUrl(p));
       urls.forEach((u) => console.log(`   - ${u}`));
       console.log('─'.repeat(60));
-      const chatTitle = msg.chat.title || msg.chat.username || 'Private Chat';
-      const username = msg.from.username || 'No username';
-      broadcast('image_saved', {
-        paths: savedPaths,
-        urls,
-        chatId: msg.chat.id,
-        chatType: msg.chat.type,
-        chatTitle,
-        user: { id: msg.from.id, username, firstName: msg.from.first_name || '', lastName: msg.from.last_name || '' },
-        messageId: msg.message_id,
-        date: new Date((msg.edit_date || msg.date) * 1000).toLocaleString(),
-        caption: textOrCaption,
-        edited: true
-      });
+      
+      // Only broadcast image_saved if this is NOT a trading signal
+      if (!isSignal) {
+        const chatTitle = msg.chat.title || msg.chat.username || 'Private Chat';
+        const username = msg.from.username || 'No username';
+        broadcast('image_saved', {
+          paths: savedPaths,
+          urls,
+          chatId: msg.chat.id,
+          chatType: msg.chat.type,
+          chatTitle,
+          user: { id: msg.from.id, username, firstName: msg.from.first_name || '', lastName: msg.from.last_name || '' },
+          messageId: msg.message_id,
+          date: new Date((msg.edit_date || msg.date) * 1000).toLocaleString(),
+          caption: textOrCaption,
+          edited: true
+        });
+      }
     }
   }
 
-  if (isTradingSignal(textOrCaption)) {
+  if (isSignal) {
     const signalDetails = extractSignalDetails(textOrCaption);
     const chatTitle = msg.chat.title || msg.chat.username || 'Private Chat';
     const username = msg.from.username || 'No username';
@@ -507,6 +509,8 @@ bot.on('channel_post', async (msg) => {
   const textOrCaption = getMessageTextOrCaption(msg) || '[No text content]';
   const imagePresent = hasImage(msg);
 
+  const isSignal = isTradingSignal(textOrCaption);
+
   // Always save images when present
   let savedPaths = [];
   if (imagePresent) {
@@ -517,22 +521,26 @@ bot.on('channel_post', async (msg) => {
       const urls = savedPaths.map((p) => toPublicUrl(p));
       urls.forEach((u) => console.log(`   - ${u}`));
       console.log('─'.repeat(60));
-      const chatTitle = msg.chat.title || 'Unknown Channel';
-      broadcast('image_saved', {
-        paths: savedPaths,
-        urls,
-        chatId: msg.chat.id,
-        chatType: msg.chat.type,
-        chatTitle,
-        user: null,
-        messageId: msg.message_id,
-        date: new Date(msg.date * 1000).toLocaleString(),
-        caption: textOrCaption
-      });
+      
+      // Only broadcast image_saved if this is NOT a trading signal
+      if (!isSignal) {
+        const chatTitle = msg.chat.title || 'Unknown Channel';
+        broadcast('image_saved', {
+          paths: savedPaths,
+          urls,
+          chatId: msg.chat.id,
+          chatType: msg.chat.type,
+          chatTitle,
+          user: null,
+          messageId: msg.message_id,
+          date: new Date(msg.date * 1000).toLocaleString(),
+          caption: textOrCaption
+        });
+      }
     }
   }
 
-  if (isTradingSignal(textOrCaption)) {
+  if (isSignal) {
     const signalDetails = extractSignalDetails(textOrCaption);
     const chatTitle = msg.chat.title || 'Unknown Channel';
     const date = new Date(msg.date * 1000).toLocaleString();
@@ -576,6 +584,8 @@ bot.on('edited_channel_post', async (msg) => {
   const textOrCaption = getMessageTextOrCaption(msg) || '[No text content]';
   const imagePresent = hasImage(msg);
 
+  const isSignal = isTradingSignal(textOrCaption);
+
   // Always save images when present
   let savedPaths = [];
   if (imagePresent) {
@@ -586,23 +596,27 @@ bot.on('edited_channel_post', async (msg) => {
       const urls = savedPaths.map((p) => toPublicUrl(p));
       urls.forEach((u) => console.log(`   - ${u}`));
       console.log('─'.repeat(60));
-      const chatTitle = msg.chat.title || 'Unknown Channel';
-      broadcast('image_saved', {
-        paths: savedPaths,
-        urls,
-        chatId: msg.chat.id,
-        chatType: msg.chat.type,
-        chatTitle,
-        user: null,
-        messageId: msg.message_id,
-        date: new Date((msg.edit_date || msg.date) * 1000).toLocaleString(),
-        caption: textOrCaption,
-        edited: true
-      });
+      
+      // Only broadcast image_saved if this is NOT a trading signal
+      if (!isSignal) {
+        const chatTitle = msg.chat.title || 'Unknown Channel';
+        broadcast('image_saved', {
+          paths: savedPaths,
+          urls,
+          chatId: msg.chat.id,
+          chatType: msg.chat.type,
+          chatTitle,
+          user: null,
+          messageId: msg.message_id,
+          date: new Date((msg.edit_date || msg.date) * 1000).toLocaleString(),
+          caption: textOrCaption,
+          edited: true
+        });
+      }
     }
   }
 
-  if (isTradingSignal(textOrCaption)) {
+  if (isSignal) {
     const signalDetails = extractSignalDetails(textOrCaption);
     const chatTitle = msg.chat.title || 'Unknown Channel';
     const editDate = new Date(msg.edit_date * 1000).toLocaleString();
